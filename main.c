@@ -10,18 +10,28 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-#define RGB_addr 0x29 // RGB sensor's i2c address is 41
-#define repeated 0
-#define Auto_inc 1 
+#include <stdio.h>
+#define SENS_ADDR 0x29 // RGB sensor's i2c address is 41
+#define CDATAL_ADDR 0x14 //clear data h address
+#define CDATAH_ADDR 0x15 //clear data l address
+#define RDATAL_ADDR 0x16 //red data h address
+#define RDATAH_ADDR 0x17 //red data l address
+#define GDATAL_ADDR 0x18 //green data h address
+#define GDATAH_ADDR 0x19 //green data l address
+#define BDATAL_ADDR 0x1A //blue data h address
+#define BDATAH_ADDR 0x1B //blue data l address
 
-void i2c_start(void){
+unsigned char INIT_SENSOR_ARRAY[10]={4,SENS_ADDR,0x03,0x01,0x00,0x00,0xFF,0xFF,0x09,0x0B};
+unsigned char *POINTER_INIT=INIT_SENSOR_ARRAY;
+
+void i2cStart(void){
 	
 	TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
 	while (!(TWCR & (1<<TWINT)));
 
 }
 
-void i2c_write(unsigned char data){
+void i2cWrite(unsigned char data){
 	
 	TWDR = data;
 	TWCR = (1<<TWINT)|(1<<TWEN);
@@ -29,91 +39,76 @@ void i2c_write(unsigned char data){
 	
 }
 
-unsigned char i2c_read(void){
+unsigned char i2cRead(void){
 
-	TWCR = (1<<TWINT)|(1<<TWEN);
+	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWEA);
 	while (!(TWCR & (1<<TWINT)));				
-	return(TWDR);
+	return TWDR;
 	
 }
 
-
-
-void i2c_stop(void){
+void i2cStop(void){
 	
 	TWCR = (1<<TWINT)|(1<<TWSTO)|(1<<TWEN);
-	while (!(TWCR & (1<<TWINT)));
 
 }
 
-void select_reg(unsigned char reg_addr,unsigned char mode){// mode 00 - Repeated byte, 01 - Auto-increment
+void selectRegister(unsigned char reg_addr,unsigned char mode){// mode 00 - Repeated byte, 01 - Auto-increment
 	
-	i2c_write((1<<7)|(mode<<5)|reg_addr);
-	
-}
-
-void RGB_init(void){
-	
-	i2c_start();
-	i2c_write(RGB_addr<<1);// 7 bit RGB sensor's address + W (0)
-	select_reg(0x03,repeated);//Wait Time Register
-	i2c_write(0xFF);// Wait time 2.4 ms
-
-	i2c_start();
-	i2c_write(RGB_addr<<1);// 7 bit RGB sensor's address + W (0)
-	select_reg(0x01,repeated);//RGBC Timing Register
-	i2c_write(0xFF);//integration time is 2.4 ms
-	
-	i2c_start();
-	i2c_write(RGB_addr<<1);// 7 bit RGB sensor's address + W (0)
-	select_reg(0x00,repeated);//Enable Register
-	i2c_write(0x09);//Power on, Wait enable
-	
-	_delay_ms(3);//delay for RGBC initialization
-	
-	i2c_start();
-	i2c_write(RGB_addr<<1);// 7 bit RGB sensor's address + W (0)
-	select_reg(0x00,repeated);//Enable Register
-	i2c_write(0x0B);//RGBC enable
+	i2cWrite((1<<7)|(mode<<5)|reg_addr);
 	
 }
 
-unsigned int read_clear(){
-	
-	i2c_start();
-	i2c_write(RGB_addr<<1);// 7 bit RGB sensor's address + W (0)
-	select_reg(0x14,repeated);//CDATAL byte
-	i2c_start();
-	i2c_write((RGB_addr<<1)|(1<<0));// 7 bit RGB sensor's address + R (1)
-	unsigned int clear_data_l=i2c_read();
-	
+void sensorInit(unsigned char *ARRAY){
 
+	for (int i=0;i<*(ARRAY+0);i++){
+		
+		i2cStart();
+		i2cWrite(*(ARRAY+1)<<1);// 7 bit RGB sensor's address + W (0)
+		i2cWrite((1<<7)|(*(ARRAY+2+i)));//select register
+		i2cWrite(*(ARRAY+6+i));//write init value
+		if(i==2) _delay_ms(3);
+		i2cStop();
+	}
+	}
+
+unsigned int readColour(unsigned char LOW_ADDR, unsigned char HIGH_ADDR){
 	
-	i2c_start();
-	i2c_write(RGB_addr<<1);// 7 bit RGB sensor's address + W (0)
-	select_reg(0x15,repeated);//CDATAH byte
-	i2c_start();
-	i2c_write((RGB_addr<<1)|(1<<0));// 7 bit RGB sensor's address + R (1)
-	unsigned int clear_data_h=i2c_read();
-
-
-	return((clear_data_h<<8)|clear_data_l);
+	i2cStart();
+	i2cWrite(SENS_ADDR<<1);// 7 bit RGB sensor's address + W (0)
+	i2cWrite((1<<7)|LOW_ADDR);// DATAL byte
+	i2cStop();
+	
+	i2cStart();
+	i2cWrite((SENS_ADDR<<1)|(1<<0));// 7 bit RGB sensor's address + R (1)
+	unsigned int LOW_DATA_VALUE=i2cRead();
+	i2cStop();
+	
+	i2cStart();
+	i2cWrite(SENS_ADDR<<1);// 7 bit RGB sensor's address + W (0)
+	i2cWrite((1<<7)|HIGH_ADDR);// DATAH byte
+	i2cStop();
+	
+	i2cStart();
+	i2cWrite((SENS_ADDR<<1)|(1<<0));// 7 bit RGB sensor's address + R (1)
+	unsigned int HIGH_DATA_VALUE=i2cRead();
+    i2cStop();
+	
+	return((HIGH_DATA_VALUE<<8)|LOW_DATA_VALUE);
 	
 }
 
 int main(void)
 {
-	unsigned int red=0,green=0,blue=0,clear=0;
-	DDRC=0x01;
+	unsigned int RED=0;
+	DDRC=0x07;
 	TWBR|=(1<<TWBR5);// TWBR=32 (for 100 kHz i2c frequency)
-	RGB_init();
-	clear=read_clear();
-	if(clear<20)
-	PORTC=1;
-	else PORTC=0;
-	i2c_stop();
-
+	sensorInit(POINTER_INIT);
+	
 	while (1){
-		
+     RED=readColour(RDATAL_ADDR,RDATAH_ADDR);
+     if (RED<500) PORTC|=0x01;
+	 _delay_ms(200);
+
 	}
 }
