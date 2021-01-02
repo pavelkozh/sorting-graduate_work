@@ -21,7 +21,7 @@
 #define BDATAL_ADDR 0x1A //blue data h address
 #define BDATAH_ADDR 0x1B //blue data l address
 
-unsigned char INIT_SENSOR_ARRAY[10]={4,SENS_ADDR,0x03,0x01,0x00,0x00,0xFF,0xFF,0x09,0x0B};
+unsigned char INIT_SENSOR_ARRAY[10]={4,SENS_ADDR,0x03,0x01,0x00,0x00,0xFF,0xFF,0x01,0x03};
 unsigned char *POINTER_INIT=INIT_SENSOR_ARRAY;
 
 void i2cStart(void){
@@ -53,20 +53,15 @@ void i2cStop(void){
 
 }
 
-void selectRegister(unsigned char reg_addr,unsigned char mode){// mode 00 - Repeated byte, 01 - Auto-increment
-	
-	i2cWrite((1<<7)|(mode<<5)|reg_addr);
-	
-}
 
 void sensorInit(unsigned char *ARRAY){
 
 	for (int i=0;i<*(ARRAY+0);i++){
 		
-		i2cStart();
+		i2cStart();		
 		i2cWrite(*(ARRAY+1)<<1);// 7 bit RGB sensor's address + W (0)
 		i2cWrite((1<<7)|(*(ARRAY+2+i)));//select register
-		i2cWrite(*(ARRAY+6+i));//write init value
+		i2cWrite(*(ARRAY+6+i));//write init value						
 		if(i==2) _delay_ms(3);
 		i2cStop();
 	}
@@ -94,21 +89,38 @@ unsigned int readColour(unsigned char LOW_ADDR, unsigned char HIGH_ADDR){
 	unsigned int HIGH_DATA_VALUE=i2cRead();
     i2cStop();
 	
+	// PON Enable (AEN is enabled after every ADC cycle)
+	
+	i2cStart();
+	i2cWrite(SENS_ADDR<<1);// 7 bit RGB sensor's address + W (0)
+	i2cWrite((1<<7)|0x00);
+	i2cWrite(0x01);
+	i2cStop();
+	
+	_delay_ms(3);
+	
 	return((HIGH_DATA_VALUE<<8)|LOW_DATA_VALUE);
 	
 }
 
 int main(void)
 {
-	unsigned int RED=0;
+	unsigned int RED=0,GREEN=0,BLUE=0;
 	DDRC=0x07;
 	TWBR|=(1<<TWBR5);// TWBR=32 (for 100 kHz i2c frequency)
 	sensorInit(POINTER_INIT);
 	
 	while (1){
-     RED=readColour(RDATAL_ADDR,RDATAH_ADDR);
-     if (RED<500) PORTC|=0x01;
-	 _delay_ms(200);
+		
+		RED=readColour(RDATAL_ADDR,RDATAH_ADDR);
+		_delay_ms(20);
+		GREEN=readColour(GDATAL_ADDR,GDATAH_ADDR);
+		_delay_ms(20);
+		BLUE=readColour(BDATAL_ADDR,BDATAH_ADDR);
+		_delay_ms(20);
+		if((RED>GREEN)&&(RED>BLUE)) PORTC=0x04;
+		else if ((GREEN>RED)&&(GREEN>BLUE)) PORTC=0x01;
+		else if ((BLUE>RED)&&(BLUE>GREEN))  PORTC=0x02;
 
 	}
 }
