@@ -11,6 +11,8 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdio.h>
+#define BAUD_RATE 9600
+#define UBRR_VALUE 8000000/16/BAUD_RATE-1
 #define SENS_ADDR 0x29 // RGB sensor's i2c address is 41
 #define CDATAL_ADDR 0x14 //clear data h address
 #define CDATAH_ADDR 0x15 //clear data l address
@@ -31,7 +33,7 @@ void i2cStart(void){
 
 }
 
-void i2cWrite(unsigned char data){
+void i2cWrite(uint8_t data){
 	
 	TWDR = data;
 	TWCR = (1<<TWINT)|(1<<TWEN);
@@ -39,7 +41,7 @@ void i2cWrite(unsigned char data){
 	
 }
 
-unsigned char i2cRead(void){
+uint8_t i2cRead(void){
 
 	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWEA);
 	while (!(TWCR & (1<<TWINT)));				
@@ -53,8 +55,19 @@ void i2cStop(void){
 
 }
 
+void usartInit(uint8_t ubrr){
+	
+	/*Set baud rate */
+	UBRR0H = ubrr>>8;
+	UBRR0L = ubrr;
+	/*Enable transmitter */
+	UCSR0B = (1<<TXEN0)|(1<<RXEN0);
+	/* Set frame format: 8 data bits, 1 stop bit, parity mode disabled */
+	UCSR0C = (0<<USBS0)|(3<<UCSZ00);
+	
+}
 
-void sensorInit(unsigned char *ARRAY){
+void sensorInit(uint8_t *ARRAY){
 
 	for (int i=0;i<*(ARRAY+0);i++){
 		
@@ -66,8 +79,24 @@ void sensorInit(unsigned char *ARRAY){
 		i2cStop();
 	}
 	}
+	
+void usartTransmit(uint8_t data){
+	
+	/* Wait for empty transmit buffer */
+	while (!(UCSR0A & (1<<UDRE0)));
+	/* Put data into buffer, sends the data */
+	UDR0 = data;
+	
+}
 
-unsigned int readColour(unsigned char LOW_ADDR, unsigned char HIGH_ADDR){
+void usartTransmitTwoBytes(uint16_t DATA){
+	
+	usartTransmit(DATA>>8);
+	usartTransmit(DATA);
+	
+}
+
+uint16_t readColour(uint8_t LOW_ADDR, uint8_t HIGH_ADDR){
 	
 	i2cStart();
 	i2cWrite(SENS_ADDR<<1);// 7 bit RGB sensor's address + W (0)
@@ -87,7 +116,7 @@ unsigned int readColour(unsigned char LOW_ADDR, unsigned char HIGH_ADDR){
 	i2cStart();
 	i2cWrite((SENS_ADDR<<1)|(1<<0));// 7 bit RGB sensor's address + R (1)
 	unsigned int HIGH_DATA_VALUE=i2cRead();
-    i2cStop();
+    	i2cStop();
 	
 	// PON Enable (AEN is enabled after every ADC cycle)
 	
@@ -105,22 +134,33 @@ unsigned int readColour(unsigned char LOW_ADDR, unsigned char HIGH_ADDR){
 
 int main(void)
 {
-	unsigned int RED=0,GREEN=0,BLUE=0;
+	uint16_t RED=0,GREEN=0,BLUE=0;
 	DDRC=0x07;
 	TWBR|=(1<<TWBR5);// TWBR=32 (for 100 kHz i2c frequency)
+	usartInit(UBRR_VALUE);
 	sensorInit(POINTER_INIT);
+
+
+
 	
 	while (1){
 		
 		RED=readColour(RDATAL_ADDR,RDATAH_ADDR);
 		_delay_ms(20);
+		
 		GREEN=readColour(GDATAL_ADDR,GDATAH_ADDR);
 		_delay_ms(20);
+		
 		BLUE=readColour(BDATAL_ADDR,BDATAH_ADDR);
 		_delay_ms(20);
+		
 		if((RED>GREEN)&&(RED>BLUE)) PORTC=0x04;
 		else if ((GREEN>RED)&&(GREEN>BLUE)) PORTC=0x01;
 		else if ((BLUE>RED)&&(BLUE>GREEN))  PORTC=0x02;
+
+        	usartTransmitTwoBytes(RED);
+		usartTransmitTwoBytes(GREEN);
+		usartTransmitTwoBytes(BLUE);
 
 	}
 }
