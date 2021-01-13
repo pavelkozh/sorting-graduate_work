@@ -13,7 +13,7 @@
 #define BDATAL_ADDR 0x1A //blue data h address
 #define BDATAH_ADDR 0x1B //blue data l address
 
-/// The function sends START condition
+/// The function for sending START condition
 void i2cStart(void);
 
 /// The function writes 8 bits data
@@ -23,7 +23,7 @@ void i2cWrite(uint8_t data);
 /// The function reads 8 bits data
 uint8_t i2cRead(void);
 
-/// The function sends STOP condition
+/// The function for sending STOP condition
 void i2cStop(void);
 
 #endif
