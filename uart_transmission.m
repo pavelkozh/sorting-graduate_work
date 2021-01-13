@@ -20,6 +20,5 @@ for i=1:1000
     cur=[red green blue];
     total=[total;cur]
 end
-fclose(dat);
-
+fclose(dat);%closing connection
 disp 'Connection is closed!'
