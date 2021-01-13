@@ -1,6 +1,5 @@
 #include "i2clib.h"
 
-
 void i2cStart(void){
 	
 	TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
