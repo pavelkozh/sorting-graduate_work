@@ -25,4 +25,7 @@ void usartTransmit(uint8_t data);
 /// The function writes 16 bits (2 bytes) data
 void usartTransmitTwoBytes(uint16_t DATA);
 
+/// The function writes 32 bits (4 bytes) of float data
+void usartTransmitFloat(float in_value);
+
 #endif
