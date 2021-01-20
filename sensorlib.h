@@ -31,8 +31,8 @@ uint16_t readColour(uint8_t low_addr, uint8_t high_addr);
 uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array);
 
 /// The function returns code of defined colour:
-/// 0 - red; 1 - yellow; 2 - green; 3 - light blue;
-/// 4 - blue; 5 - pink;
+/// 0 - red; 1 - orange; 2 - yellow; 3 - green; 4 - light blue;
+/// 5 - blue; 6 - pink;
 /// Parameters: hue - Value of parameter Hue in HSV array
 uint8_t getColourCode(float hue);
 
