@@ -42,7 +42,6 @@ int main(void)
 
 	while (1){
 		
-		if (usartReceive()=='s'){
 			
 			rgb_array[0]=readColour(RDATAL_ADDR,RDATAH_ADDR);//red
 			_delay_ms(20);
@@ -59,6 +58,6 @@ int main(void)
 					usartTransmit(colour_code);
 				}
 				else usartTransmit(0);//colour is not defined
-		}
+
 	}
 }
