@@ -27,9 +27,14 @@
 unsigned char init_sensor_array[10]={4,SENS_ADDR,0x03,0x01,0x00,0x00,0xFF,0xFF,0x01,0x03};
 unsigned char *pointer_init=init_sensor_array;
 
+
 int main(void)
 {
-	uint16_t red=0,green=0,blue=0;
+	uint16_t rgb_array[3]={0,0,0};
+	uint8_t colour_code=0;
+	float hsv_array[3]={0,0,0};
+	float *pointer_hsv=hsv_array;
+	uint16_t *pointer_rgb=rgb_array;
 	DDRC=0x07;
 	TWBR|=(1<<TWBR5);// TWBR=32 (for 100 kHz i2c frequency)
 	usartInit(UBRR_VALUE);
@@ -37,22 +42,23 @@ int main(void)
 
 	while (1){
 		
-		red=readColour(RDATAL_ADDR,RDATAH_ADDR);
-		_delay_ms(20);
-		
-		green=readColour(GDATAL_ADDR,GDATAH_ADDR);
-		_delay_ms(20);
-		
-		blue=readColour(BDATAL_ADDR,BDATAH_ADDR);
-		_delay_ms(20);
-		
-		if((red>green)&&(red>blue)) PORTC=0x04;
-		else if ((green>red)&&(green>blue)) PORTC=0x01;
-		else if ((blue>red)&&(blue>green))  PORTC=0x02;
-
-        	usartTransmitTwoBytes(red);
-		usartTransmitTwoBytes(green);
-		usartTransmitTwoBytes(blue);
-
+		if (usartReceive()=='s'){
+			
+			rgb_array[0]=readColour(RDATAL_ADDR,RDATAH_ADDR);//red
+			_delay_ms(20);
+			
+			rgb_array[1]=readColour(GDATAL_ADDR,GDATAH_ADDR);//green
+			_delay_ms(20);
+			
+			rgb_array[2]=readColour(BDATAL_ADDR,BDATAH_ADDR);//blue
+			_delay_ms(20);
+			
+				if (rgb2hsv(pointer_rgb,pointer_hsv)) {
+					usartTransmit(1);//colour is defined
+					colour_code=getColourCode(hsv_array[0]);
+					usartTransmit(colour_code);
+				}
+				else usartTransmit(0);//colour is not defined
+		}
 	}
 }

@@ -26,4 +26,14 @@ void sensorInit(uint8_t *init_array);
 /// Parameters: low_addr, high_addr - addresses of red, green or blue low and high data
 uint16_t readColour(uint8_t low_addr, uint8_t high_addr);
 
+/// The function for converting RGB data to HSV data
+/// Parameters: in_rgb_array - pointer to input RGB array; out_hsv_array - pointer to output HSV array;
+uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array);
+
+/// The function returns code of defined colour:
+/// 0 - red; 1 - yellow; 2 - green; 3 - light blue;
+/// 4 - blue; 5 - pink;
+/// Parameters: hue - Value of parameter Hue in HSV array
+uint8_t getColourCode(float hue);
+
 #endif

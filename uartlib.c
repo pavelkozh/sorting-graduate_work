@@ -33,3 +33,12 @@ void usartTransmitTwoBytes(uint16_t data){
 	usartTransmit(data);
 	
 }
+
+void usartTransmitFloat(float in_value){
+	
+	unsigned char *pointer;
+	pointer = (unsigned char *)&in_value;
+	for (uint8_t i=0;i<4;i++)
+	usartTransmit(*(pointer++));
+	
+}
