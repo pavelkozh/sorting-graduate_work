@@ -92,10 +92,11 @@ uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
 
 uint8_t getColourCode(float hue){
 	
-	if ((hue>=340)||(hue<30)) return 0;//Code of red colour
-	else if ((hue>=30)&&(hue<90)) return 1;//Code of yellow colour
-	else if ((hue>=90)&&(hue<150)) return 2;//Code of green colour
-	else if ((hue>=150)&&(hue<210)) return 3;//Code of light blue colour
-	else if ((hue>=210)&&(hue<270)) return 4;//Code of blue colour
-	else if ((hue>=270)&&(hue<340)) return 5;//Code of pink colour
+	if ((hue>=345)||(hue<15)) return 0;//Code of red colour
+	else if ((hue>=15)&&(hue<30)) return 1;//Code of orange colour
+	else if ((hue>=30)&&(hue<90)) return 2;//Code of yellow colour
+	else if ((hue>=90)&&(hue<150)) return 3;//Code of green colour
+	else if ((hue>=150)&&(hue<210)) return 4;//Code of light blue colour
+	else if ((hue>=210)&&(hue<270)) return 5;//Code of blue colour
+	else if ((hue>=270)&&(hue<345)) return 6;//Code of pink colour
 }
