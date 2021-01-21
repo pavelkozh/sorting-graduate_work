@@ -42,22 +42,16 @@ int main(void)
 
 	while (1){
 		
+		rgb_array[0]=readColour(RDATAL_ADDR,RDATAH_ADDR);//red
+		rgb_array[1]=readColour(GDATAL_ADDR,GDATAH_ADDR);//green		
+		rgb_array[2]=readColour(BDATAL_ADDR,BDATAH_ADDR);//blue
 			
-			rgb_array[0]=readColour(RDATAL_ADDR,RDATAH_ADDR);//red
-			_delay_ms(20);
-			
-			rgb_array[1]=readColour(GDATAL_ADDR,GDATAH_ADDR);//green
-			_delay_ms(20);
-			
-			rgb_array[2]=readColour(BDATAL_ADDR,BDATAH_ADDR);//blue
-			_delay_ms(20);
-			
-				if (rgb2hsv(pointer_rgb,pointer_hsv)) {
-					usartTransmit(1);//colour is defined
-					colour_code=getColourCode(hsv_array[0]);
-					usartTransmit(colour_code);
-				}
-				else usartTransmit(0);//colour is not defined
+			if (rgb2hsv(pointer_rgb,pointer_hsv)) {
+				usartTransmit(1);//colour is defined
+				colour_code=getColourCode(hsv_array[0]);
+				usartTransmit(colour_code);
+			}
+			else usartTransmit(0);//colour is not defined
 
 	}
 }
