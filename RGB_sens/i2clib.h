@@ -1,8 +1,6 @@
 #ifndef i2clib_H_INCLUDED
 #define i2clib_H_INCLUDED
 #include <avr/io.h>
-#define BAUD_RATE 19200
-#define UBRR_VALUE 8000000/16/BAUD_RATE-1
 #define SENS_ADDR 0x29 // RGB sensor's i2c address is 41
 #define CDATAL_ADDR 0x14 //clear data h address
 #define CDATAH_ADDR 0x15 //clear data l address
