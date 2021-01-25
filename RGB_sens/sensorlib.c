@@ -1,5 +1,8 @@
 #include "sensorlib.h"
 
+extern uint16_t ind;
+extern uint8_t flag;
+
 void sensorInit(uint8_t *init_array){
 	
 	TWBR |= (1 << TWBR5);// TWBR=32 (for 100 kHz i2c frequency)
@@ -106,4 +109,52 @@ uint8_t getColourCode(float hue){
 	else if ( (hue >= 150) && (hue < 210) ) return 5;//Code of light blue colour
 	else if ( (hue >= 210) && (hue < 270) ) return 6;//Code of blue colour
 	else if ( (hue >= 270) && (hue < 345) ) return 7;//Code of pink colour
+}
+
+void cutArray(uint8_t *input_array,uint8_t *output_array){
+	
+	uint16_t num_of_elements = ind;
+	uint16_t low_edge = num_of_elements*0.1;
+	uint16_t high_edge = num_of_elements*0.9;
+	ind = high_edge-low_edge;
+	for(uint16_t j = 0; j < ind; j++){
+		output_array[j] = input_array[j+low_edge];
+	}
+	
+}
+
+uint8_t getSingleMeasurement(uint16_t* rgb_array_pointer, float* hsv_array_pointer){
+	
+	rgb_array_pointer[0] = readColour(RDATAL_ADDR, RDATAH_ADDR);//red
+	rgb_array_pointer[1] = readColour(GDATAL_ADDR, GDATAH_ADDR);//green
+	rgb_array_pointer[2] = readColour(BDATAL_ADDR, BDATAH_ADDR);//blue
+	if ( rgb2hsv(rgb_array_pointer, hsv_array_pointer) ) {
+		uint8_t colour_code = getColourCode(hsv_array_pointer[0]);
+		return(colour_code);//return colour code
+	}
+	return(0); //colour is not defined
+	
+}
+
+void getCutSampleArray(uint8_t defined_colour, uint8_t* sample_array, uint8_t *cut_array){
+	PORTC = 1;
+	if(defined_colour > 0){
+		
+		flag = 1;
+		sample_array[ind] = defined_colour;
+		ind+=1;
+		if(ind > 199) ind = 199;
+	}
+	else {
+		PORTC = 0;
+		if(flag == 1){
+			
+			cutArray(sample_array, cut_array);
+			usartTransmitTwoBytes(ind);
+			usartTransmitArray(cut_array, ind);
+			ind = 0;
+			flag = 0;
+		}
+		
+	}
 }

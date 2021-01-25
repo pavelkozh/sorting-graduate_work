@@ -18,57 +18,6 @@ uint8_t init_sensor_array[10] = {4, SENS_ADDR, 0x03, 0x01, 0x00, 0x00, 0xFF, 0xF
 uint16_t ind = 0;//index of sample array's element
 uint8_t flag = 0;
 
-void cutArray(uint8_t *input_array,uint8_t *output_array){
-	
-	uint16_t num_of_elements = ind;
-	uint16_t low_edge = num_of_elements*0.1;
-	uint16_t high_edge = num_of_elements*0.9;
-	ind = high_edge-low_edge;
-	for(uint16_t j = 0; j < ind; j++){
-		output_array[j] = input_array[j+low_edge];
-	}
-	
-}
-
-uint8_t getSingleMeasurement(uint16_t* rgb_array_pointer, float* hsv_array_pointer){
-		
-	rgb_array_pointer[0] = readColour(RDATAL_ADDR, RDATAH_ADDR);//red
-	rgb_array_pointer[1] = readColour(GDATAL_ADDR, GDATAH_ADDR);//green
-	rgb_array_pointer[2] = readColour(BDATAL_ADDR, BDATAH_ADDR);//blue
-	if ( rgb2hsv(rgb_array_pointer, hsv_array_pointer) ) {
-		uint8_t colour_code = getColourCode(hsv_array_pointer[0]);
-		return(colour_code);//return colour code
-	}
-	return(0); //colour is not defined
-	
-}
-
-void getCutSampleArray(uint8_t defined_colour, uint8_t* sample_array, uint8_t *cut_array){
-		PORTC = 1;
-	if(defined_colour > 0){
-		
-		flag = 1;
-		sample_array[ind] = defined_colour;
-		ind+=1;
-		if(ind > 199) ind = 199;
-	}
-	else {
-		PORTC = 0;
-		if(flag == 1){
-	
-			cutArray(sample_array, cut_array);
-			usartTransmitTwoBytes(ind);
-			usartTransmitArray(cut_array, ind);
-			ind = 0;
-			flag = 0;
-			}
-			
-		}
-	}
-	
-
-
-
 
 int main(void)
 {

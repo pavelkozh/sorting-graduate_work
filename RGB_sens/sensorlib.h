@@ -21,9 +21,25 @@ uint16_t readColour(uint8_t low_addr, uint8_t high_addr);
 uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array);
 
 /// The function returns code of defined colour:
-/// 0 - red; 1 - orange; 2 - yellow; 3 - green; 4 - light blue;
-/// 5 - blue; 6 - pink;
+/// 1 - red; 2 - orange; 3 - yellow; 4 - green; 5 - light blue;
+/// 6 - blue; 7 - pink;
 /// Parameters: hue - Value of parameter Hue in HSV array
 uint8_t getColourCode(float hue);
+
+/// The function cuts array from the edges (10% of array size) 
+/// Parameters: *input_array - pointer at array to cut;
+/// *output_array - pointer at cut array;
+void cutArray(uint8_t *input_array,uint8_t *output_array);
+
+/// The function returns colour code (from 1 to 7) or 0 if colour is not defined
+/// Parameters: *rgb_array_pointer - pointer at rgb array;
+/// *hsv_array_pointer - pointer at hsv array;
+uint8_t getSingleMeasurement(uint16_t* rgb_array_pointer, float* hsv_array_pointer);
+
+///The function transmits cut array by UART
+/// Parameters: defined_colour - code of defined colour (1-7) or 0 if colour is not defined 
+///* sample_array - pointer at array with read colour codes;
+///*cut_array - pointer at cut sample array;
+void getCutSampleArray(uint8_t defined_colour, uint8_t* sample_array, uint8_t *cut_array);
 
 #endif
