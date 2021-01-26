@@ -1,5 +1,8 @@
 #include "sensorlib.h"
 
+uint8_t flag=1;
+static float max_value,min_value,a;
+
 void sensorInit(uint8_t *init_array){
 	
 	TWBR |= (1 << TWBR5);// TWBR=32 (for 100 kHz i2c frequency)
@@ -52,9 +55,15 @@ uint16_t readColour(uint8_t low_addr, uint8_t high_addr){
 
 uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
 
-    float max_value = 65535;
-    float min_value = 0;
-    float a = 255 / (max_value - min_value);
+	if(flag==1){
+		
+		     max_value = 65535;
+		     min_value = 0;
+		     a = 255 / (max_value - min_value);
+			flag=0;
+	}
+
+
 	float norm_max_value = 0;
 	float norm_min_value = 0;
 
