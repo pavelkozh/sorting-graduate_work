@@ -28,28 +28,33 @@ void usartTransmit(uint8_t data){
 }
 
 void usartTransmitTwoBytes(uint16_t data){
-	
-	usartTransmit(data >> 8);
-	usartTransmit(data);
+
+	uint8_t *pointer;
+	pointer = (unsigned char *) &data;
+	for (uint8_t i = 0; i < 2; i++)
+	usartTransmit( *(pointer++) );
 	
 }
 
 void usartTransmitFloat(float in_value){
 	
-	unsigned char *pointer;
+	uint8_t *pointer;
 	pointer = (unsigned char *) &in_value;
 	for (uint8_t i = 0; i < 4; i++)
 	usartTransmit( *(pointer++) );
 	
 }
 
-void usartTransmitArray(uint8_t *array, uint16_t count_of_elements){
+void usartTransmitArray(uint8_t *array, uint16_t count_of_elements, uint8_t type){
 	
-	// type of array is uint8_t
-	
-	for(uint16_t i = 0; i < count_of_elements; i++){
-		
-		usartTransmit( array[i] );
-	}
-	
+	usartTransmitTwoBytes(count_of_elements);
+
+		for(uint16_t i = 0; i < count_of_elements; i++){
+			for (uint8_t j = 0; j < type; j++){
+				usartTransmit( array[i*type+j] );
+			
+			}
+		}
+
 }
+

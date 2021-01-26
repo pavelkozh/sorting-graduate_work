@@ -20,9 +20,10 @@ void usartTransmitTwoBytes(uint16_t DATA);
 /// The function writes 32 bits (4 bytes) of float data
 void usartTransmitFloat(float in_value);
 
-/// The function writes elements of uint8_t array
+/// The function writes elements of array
 /// Parameters: array - pointer at the beginning of array;
 /// count_of_elements - count of elements in array
-void usartTransmitArray(uint8_t *array, uint16_t count_of_elements);
+/// type - type of array (1 - uint8_t; 2 - uint16_t; 4 - float)
+void usartTransmitArray(uint8_t *array, uint16_t count_of_elements, uint8_t type);
 	
 #endif

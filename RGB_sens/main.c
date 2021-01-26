@@ -28,6 +28,7 @@ int main(void)
 	sensorInit(init_sensor_array);
 
 	while (1){
+			
 			ind=0;
 			PORTC = 0;
 			uint8_t defined_colour = getSingleMeasurement(rgb_array, hsv_array);
@@ -45,20 +46,6 @@ int main(void)
 				usartTransmit(most_element);
 			}
 			usartTransmit(0);//black
-
-
-			/*
-        rgb_array[0]=readColour(RDATAL_ADDR,RDATAH_ADDR);//red
-        rgb_array[1]=readColour(GDATAL_ADDR,GDATAH_ADDR);//green
-        rgb_array[2]=readColour(BDATAL_ADDR,BDATAH_ADDR);//blue
-             		
-        if (rgb2hsv(pointer_rgb,pointer_hsv)) {
-	            usartTransmit(1);//colour is defined
-	            colour_code=getColourCode(hsv_array[0]);
-	            usartTransmit(colour_code);
-        }
-        else usartTransmit(0);//colour is not defined
-             */		
              	
 	}
 }
