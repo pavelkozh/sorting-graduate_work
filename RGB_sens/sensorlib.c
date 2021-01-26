@@ -1,9 +1,5 @@
 #include "sensorlib.h"
 
-extern uint16_t ind;
-extern uint8_t flag;
-extern float max_value,min_value;
-
 void sensorInit(uint8_t *init_array){
 	
 	TWBR |= (1 << TWBR5);// TWBR=32 (for 100 kHz i2c frequency)
@@ -55,13 +51,13 @@ uint16_t readColour(uint8_t low_addr, uint8_t high_addr){
 }
 
 uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
-	
 
+    float max_value = 65535;
+    float min_value = 0;
+    float a = 255 / (max_value - min_value);
 	float norm_max_value = 0;
 	float norm_min_value = 0;
-	float a = 255 / ( max_value - min_value );
 
-	
     float r = ( in_rgb_array[0] - min_value ) * a;
     float g = ( in_rgb_array[1] - min_value ) * a;
     float b = ( in_rgb_array[2] - min_value ) * a;
@@ -112,16 +108,15 @@ uint8_t getColourCode(float hue){
 	else if ( (hue >= 270) && (hue < 345) ) return 7;//Code of pink colour
 }
 
-void cutArray(uint8_t *input_array,uint8_t *output_array){
+uint16_t cutArray(uint8_t *input_array,uint8_t *output_array, uint16_t num_of_elements){
 	
-	uint16_t num_of_elements = ind;
 	uint16_t low_edge = num_of_elements*0.1;
 	uint16_t high_edge = num_of_elements*0.9;
-	ind = high_edge-low_edge;
-	for(uint16_t j = 0; j < ind; j++){
+	uint16_t out_count_elements = high_edge-low_edge;
+	for(uint16_t j = 0; j < out_count_elements; j++){
 		output_array[j] = input_array[j+low_edge];
 	}
-	
+	return out_count_elements;
 }
 
 uint8_t getSingleMeasurement(uint16_t* rgb_array_pointer, float* hsv_array_pointer){
@@ -133,29 +128,78 @@ uint8_t getSingleMeasurement(uint16_t* rgb_array_pointer, float* hsv_array_point
 		uint8_t colour_code = getColourCode(hsv_array_pointer[0]);
 		return(colour_code);//return colour code
 	}
-	return(0); //colour is not defined
+	return(0); //colour is not defined (black)
 	
 }
 
-void getCutSampleArray(uint8_t defined_colour, uint8_t* sample_array, uint8_t *cut_array){
-	PORTC = 1;
-	if(defined_colour > 0){
-		
-		flag = 1;
-		sample_array[ind] = defined_colour;
-		ind+=1;
-		if(ind > 199) ind = 199;
-	}
-	else {
-		PORTC = 0;
-		if(flag == 1){
-			
-			cutArray(sample_array, cut_array);
-			usartTransmitTwoBytes(ind);
-			usartTransmitArray(cut_array, ind);
-			ind = 0;
-			flag = 0;
+uint8_t getMostCommonElement(uint8_t *array, uint16_t size_of_array){
+	
+	uint8_t colour_array[7]={0};//array of elements containing the frequency of each colour
+	uint8_t var=0;//secondary variable for sorting colour_array
+	uint8_t sec_array[7]={0}; // copy of filled colour_array
+	
+	for (uint16_t i = 0; i < size_of_array; i++){// filling the colour_array
+		/*
+		if(array[i] == 1) colour_array[0]++;
+		else if(array[i] == 2) colour_array[1]++;
+		else if(array[i] == 3) colour_array[2]++;
+		else if(array[i] == 4) colour_array[3]++;
+		else if(array[i] == 5) colour_array[4]++;
+		else if(array[i] == 6) colour_array[5]++;
+		else if(array[i] == 7) colour_array[6]++;
+		*/
+		switch (array[i])
+		{
+		case 1:
+			colour_array[0]++;
+			break;
+		case 2:
+			colour_array[1]++;
+			break;
+		case 3:
+			colour_array[2]++;
+			break;
+		case 4:
+			colour_array[3]++;
+			break;
+		case 5:
+			colour_array[4]++;
+			break;
+		case 6:
+			colour_array[5]++;
+			break;
+		case 7:
+			colour_array[6]++;
+			break;
 		}
-		
 	}
+	
+	for (uint8_t i = 0; i < 7; i++){//copying colour_array
+		
+		sec_array[i] = colour_array[i];
+	}
+	
+	for(uint8_t j = 0; j < 6; j++){// max element will move to the end of the sec_array
+		
+		if(sec_array[j] > sec_array[j+1]){
+			
+			var = sec_array[j+1];
+			sec_array[j+1] = sec_array[j];
+			sec_array[j] = var;
+		}
+	}
+	
+	for (uint8_t i = 0; i < 7;i++){
+		
+		if(colour_array[i] == sec_array[6]) return (i+1);
+	}
+	
+}
+
+uint16_t getSampleArray(uint8_t defined_colour, uint8_t* sample_array, uint16_t elem_index){
+
+		sample_array[elem_index] = defined_colour;
+		elem_index+=1;
+		if(elem_index > 199) elem_index = 199;
+		return elem_index;	
 }
