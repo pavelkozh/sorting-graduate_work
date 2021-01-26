@@ -17,7 +17,10 @@
 uint8_t init_sensor_array[10] = {4, SENS_ADDR, 0x03, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0x01, 0x03};
 uint16_t ind = 0;//index of sample array's element
 uint8_t flag = 0;
-
+float max_value = 65535;
+float min_value = 0;
+//float a = 255 / ( 65535 - 0 );
+//float a = 255 / ( max_value - min_value );
 
 int main(void)
 {

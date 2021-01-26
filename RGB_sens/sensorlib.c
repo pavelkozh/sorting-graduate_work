@@ -2,6 +2,7 @@
 
 extern uint16_t ind;
 extern uint8_t flag;
+extern float max_value,min_value;
 
 void sensorInit(uint8_t *init_array){
 	
@@ -55,12 +56,12 @@ uint16_t readColour(uint8_t low_addr, uint8_t high_addr){
 
 uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
 	
-	float max_value = 65535;
-	float min_value = 0;
+
 	float norm_max_value = 0;
 	float norm_min_value = 0;
 	float a = 255 / ( max_value - min_value );
 
+	
     float r = ( in_rgb_array[0] - min_value ) * a;
     float g = ( in_rgb_array[1] - min_value ) * a;
     float b = ( in_rgb_array[2] - min_value ) * a;
@@ -72,8 +73,6 @@ uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
     if( (r <= g) && (r <= b) ) norm_min_value = r;
     else if ( (g <= r) && (g <= b) ) norm_min_value = g;
     else if( (b <= r) && (b <= g) ) norm_min_value = b;
-    
-	float range = 60 / ( norm_max_value - norm_min_value );
 	
     if( norm_max_value == norm_min_value ) return 0; //colour not defined
 	
@@ -85,6 +84,8 @@ uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
     else out_hsv_array[1] = 1 - norm_min_value / norm_max_value;
     
     //H
+	float range = 60 / ( norm_max_value - norm_min_value );
+	
     if( (norm_max_value == r) && (g >= b) )
     out_hsv_array[0] = (g - b) * range;
 	
