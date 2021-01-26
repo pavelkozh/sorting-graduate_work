@@ -3,7 +3,7 @@ close all
 clear all
 global dat
 delete(instrfind);
-dat = serial('COM5', 'BaudRate', 9600);
+dat = serial('COM5', 'BaudRate', 19200);
 dat.InputBufferSize = 4096;
 
 fopen(dat); 
