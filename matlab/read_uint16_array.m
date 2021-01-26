@@ -13,7 +13,7 @@ array=[];
 fwrite(dat,'s','uint8');
 array_size = fread(dat,1,'uint16');
 for i=1:array_size        
-      current=fread(dat,1,'uint8');
+      current=fread(dat,1,'uint16');
       array=[array current];
          
 end
