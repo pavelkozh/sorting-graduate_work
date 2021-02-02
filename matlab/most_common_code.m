@@ -34,4 +34,4 @@ while(1)
 end
 
 fclose(dat);
-disp 'Connection is closed!'f
+disp 'Connection is closed!'
