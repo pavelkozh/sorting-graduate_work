@@ -1,6 +1,6 @@
 #include "i2clib.h"
 
-
+/*Sending START-condition*/
 void i2cStart(void){
 	
 	TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
@@ -8,6 +8,7 @@ void i2cStart(void){
 
 }
 
+/*Writing 8 bits of data*/
 void i2cWrite(uint8_t data){
 	
 	TWDR = data;
@@ -16,6 +17,7 @@ void i2cWrite(uint8_t data){
 	
 }
 
+/*Reading 8 bits of data*/
 uint8_t i2cRead(void){
 
 	TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
@@ -24,6 +26,7 @@ uint8_t i2cRead(void){
 	
 }
 
+/*Sending STOP-condition*/
 void i2cStop(void){
 	
 	TWCR = (1 << TWINT) | (1 << TWSTO) | (1 << TWEN);

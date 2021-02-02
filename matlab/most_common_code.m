@@ -10,7 +10,7 @@ fopen(dat);
 set(dat, 'ByteOrder', 'littleEndian'); 
 disp 'Connection is ready!'
 disp 'Press "s" to start!'
-indicator=[1 0 0; 0.850 0.325 0.098; 1 1 0; 0 1 0; ...
+indicator=[1 0 0; 1 0.5 0; 1 1 0; 0 1 0; ...
 0 1 1; 0 0 1; 1 0 1];
 plot(0,0,'o','MarkerSize',72,'MarkerFaceColor',[1 1 1],'MarkerEdgeColor','none')
 
@@ -34,4 +34,4 @@ while(1)
 end
 
 fclose(dat);
-disp 'Connection is closed!'
+disp 'Connection is closed!'f

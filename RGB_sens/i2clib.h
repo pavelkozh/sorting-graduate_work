@@ -2,8 +2,6 @@
 #define i2clib_H_INCLUDED
 #include <avr/io.h>
 #define SENS_ADDR 0x29 // RGB sensor's i2c address is 41
-#define CDATAL_ADDR 0x14 //clear data h address
-#define CDATAH_ADDR 0x15 //clear data l address
 #define RDATAL_ADDR 0x16 //red data h address
 #define RDATAH_ADDR 0x17 //red data l address
 #define GDATAL_ADDR 0x18 //green data h address

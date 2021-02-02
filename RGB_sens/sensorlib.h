@@ -13,18 +13,20 @@
 void sensorInit(uint8_t *init_array);
 
 /// The function for reading 16 bits result of ADC conversion
-/// Parameters: low_addr, high_addr - addresses of red, green or blue low and high data
+/// Parameters: low_addr, high_addr - addresses of red,
+/// green or blue low and high data
 uint16_t readColour(uint8_t low_addr, uint8_t high_addr);
 
 /// The function for converting RGB data to HSV data
-/// Parameters: in_rgb_array - pointer to input RGB array; out_hsv_array - pointer to output HSV array;
+/// Parameters: in_rgb_array - pointer to input RGB array;
+/// out_hsv_array - pointer to output HSV array;
 uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array);
 
 /// The function returns code of defined colour:
 /// 1 - red; 2 - orange; 3 - yellow; 4 - green; 5 - light blue;
-/// 6 - blue; 7 - pink;
-/// Parameters: hue - Value of parameter Hue in HSV array
-uint8_t getColourCode(float hue);
+/// 6 - blue; 7 - pink; 8 - brown
+/// Parameters: hsv_array - Pointer to HSV array
+uint8_t getColourCode(float *hsv_array);
 
 /// The function returns code (1-7) of most common element in array:
 /// Parameters: *array - array for finding most common element;
@@ -43,7 +45,8 @@ uint16_t cutArray(uint8_t *input_array,uint8_t *output_array, uint16_t num_of_el
 uint8_t getSingleMeasurement(uint16_t* rgb_array_pointer, float* hsv_array_pointer);
 
 ///The function fills sample_array and returns total count of read elements
-/// Parameters: defined_colour - code of defined colour (1-7) or 0 if colour is not defined 
+/// Parameters: defined_colour - code of defined colour (1-7)
+/// or 0 if colour is not defined;
 ///* sample_array - pointer at array with read colour codes;
 ///*cut_array - pointer at cut sample array;
 uint16_t getSampleArray(uint8_t defined_colour, uint8_t* sample_array, uint16_t elem_index);

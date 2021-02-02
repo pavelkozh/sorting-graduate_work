@@ -14,8 +14,8 @@
 #include "uartlib.h"
 #include "sensorlib.h"
 
-uint8_t init_sensor_array[10] = {4, SENS_ADDR, 0x03, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0x01, 0x03};
-
+uint8_t init_sensor_array[10] = {3, SENS_ADDR, 0x01, 0x00, 0x00, 0xFF, 0x01, 0x03};
+	
 int main(void)
 {
 	uint16_t rgb_array[3] = {0, 0, 0};
@@ -25,27 +25,36 @@ int main(void)
 	uint8_t ind=0;	
 	DDRC = 0x07;
 	usartInit(UBRR_VALUE);
-	sensorInit(init_sensor_array);
+	sensorInit(init_sensor_array);	
+/*
+		if(getSingleMeasurement(rgb_array,hsv_array)){
+			usartTransmitTwoBytes(rgb_array[0]);
+			usartTransmitTwoBytes(rgb_array[1]);
+			usartTransmitTwoBytes(rgb_array[2]);
+			usartTransmitFloat(hsv_array[0]);
+			usartTransmitFloat(hsv_array[1]);
+			usartTransmitFloat(hsv_array[2]);
+		}*/
 
 	while (1){
-			
-			ind=0;
-			PORTC = 0;
-			uint8_t defined_colour = getSingleMeasurement(rgb_array, hsv_array);
-			
-			if(defined_colour) {
-					PORTC = 1;
-				do 
-				{
-					ind=getSampleArray(defined_colour,sample_array,ind);
-					defined_colour = getSingleMeasurement(rgb_array, hsv_array);
-				} while (defined_colour);
-				uint16_t cut_array_size=cutArray(sample_array,cut_sample_array,ind);
-				uint8_t most_element=getMostCommonElement(cut_sample_array,cut_array_size);
-				usartTransmit(1);
-				usartTransmit(most_element);
-			}
-			usartTransmit(0);//black
-             	
+		
+
+		ind=0;
+		PORTC = 0;
+		uint8_t defined_colour = getSingleMeasurement(rgb_array, hsv_array);
+		if(defined_colour) {
+				PORTC = 1;
+			do 
+			{
+				ind=getSampleArray(defined_colour,sample_array,ind);
+				defined_colour = getSingleMeasurement(rgb_array, hsv_array);
+			} while (defined_colour);
+			uint16_t cut_array_size=cutArray(sample_array,cut_sample_array,ind);
+			uint8_t most_element=getMostCommonElement(cut_sample_array,cut_array_size);
+			usartTransmit(1);
+			usartTransmit(most_element);
+		}
+		usartTransmit(0);//black
+
 	}
 }
