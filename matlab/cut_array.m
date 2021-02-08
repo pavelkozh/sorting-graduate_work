@@ -10,8 +10,9 @@ set(dat, 'ByteOrder', 'littleEndian');
 disp 'Connection is ready!'
 total=[];
 while(1)
-    array_size_cut = fread(dat,2,'uint8');
-    array_size_cut = typecast(uint8([array_size_cut(2), array_size_cut(1)]), 'uint16');
+    fwrite(dat,'s','uint8');
+    array_size_cut = fread(dat,1,'uint16');
+    %array_size_cut = typecast(uint8([array_size_cut(2), array_size_cut(1)]), 'uint16');
     for i=1:array_size_cut
         cur=fread(dat,1,'uint8');
         total=[total cur];

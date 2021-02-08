@@ -8,17 +8,19 @@ dat.InputBufferSize = 4096;
 fopen(dat);
 set(dat, 'ByteOrder', 'littleEndian'); 
 disp 'Connection is ready!'
-array=[];
+array=[0 0 0] ;
+total=[];
+while(1)
 
 fwrite(dat,'s','uint8');
 array_size = fread(dat,1,'uint16');
 for i=1:array_size        
       current=fread(dat,1,'single');
-      array=[array current];
-         
+      array(i)=current;   
+
+total=[total; array]
 end
-array
-%array=[];
+end
 
 fclose(dat);
 disp 'Connection is closed!'
