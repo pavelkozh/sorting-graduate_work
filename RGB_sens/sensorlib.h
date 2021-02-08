@@ -13,9 +13,11 @@
 void sensorInit(uint8_t *init_array);
 
 /// The function for reading 16 bits result of ADC conversion
-/// Parameters: low_addr, high_addr - addresses of red,
-/// green or blue low and high data
-uint16_t readColour(uint8_t low_addr, uint8_t high_addr);
+/// Parameters: rgb_array - pointer to rgg array
+void readColour(uint16_t *rgb_array);
+
+/// The function for starting new ADC conversion
+void startConvertion(void);
 
 /// The function for converting RGB data to HSV data
 /// Parameters: in_rgb_array - pointer to input RGB array;

@@ -12,35 +12,38 @@ void sensorInit(uint8_t *init_array){
 		i2cStart();
 		i2cWrite(init_array[1] << 1);// 7 bit RGB sensor's address + W (0)
 		i2cWrite( (1 << 7) | init_array[2+i] );//select register
-		i2cWrite( init_array[5+i] );//write init value
-		if(i == 1) _delay_ms(3);
+		i2cWrite( init_array[6+i] );//write init value
+		if(i == 2) _delay_ms(3);
 		i2cStop();
 	}
 
 }
 
-uint16_t readColour(uint8_t low_addr, uint8_t high_addr){
+void readColour(uint16_t *rgb_array){
 	
 	i2cStart();
 	i2cWrite(SENS_ADDR << 1);// 7 bit RGB sensor's address + W (0)
-	i2cWrite( (1 << 7) | low_addr );// DATAL byte
-	i2cStop();
+	i2cWrite( (1 << 7) | (1 << 5) | RDATAL_ADDR );// DATAL byte
 	
 	i2cStart();
 	i2cWrite( (SENS_ADDR << 1) | (1 << 0) );// 7 bit RGB sensor's address + R (1)
+	
 	uint8_t low_data_value = i2cRead();
-	i2cStop();
-	
-	i2cStart();
-	i2cWrite(SENS_ADDR << 1);// 7 bit RGB sensor's address + W (0)
-	i2cWrite( (1 << 7) | high_addr );// DATAH byte
-	i2cStop();
-	
-	i2cStart();
-	i2cWrite( (SENS_ADDR << 1) | (1 << 0) );// 7 bit RGB sensor's address + R (1)
 	uint8_t high_data_value = i2cRead();
-	i2cStop();
+	rgb_array[0] = (high_data_value << 8) | low_data_value;
 	
+	low_data_value = i2cRead();
+	high_data_value = i2cRead();
+	rgb_array[1] = (high_data_value << 8) | low_data_value;
+	
+	low_data_value = i2cRead();
+	high_data_value = i2cRead();
+	rgb_array[2] = (high_data_value << 8) | low_data_value;
+	
+}
+
+void startConvertion(void){
+
 	// PON Enable (AEN is enabled after every ADC cycle)
 	
 	i2cStart();
@@ -51,14 +54,13 @@ uint16_t readColour(uint8_t low_addr, uint8_t high_addr){
 	
 	_delay_ms(3);// delay for initialize after setting PON
 	
-	return( ( high_data_value << 8 ) | low_data_value );
 }
 
 uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
 
 	if(flag==1){
 		
-		     max_value = 12500;
+		     max_value = 50;
 		     min_value = 0;
 		     a = 1 / (max_value - min_value);
 			flag=0;
@@ -109,13 +111,13 @@ uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
 
 uint8_t getColourCode(float *hsv_array){
 	
-	if ( (hsv_array[0] >= 345) || (hsv_array[0] < 15) ) return 1;//Code of red colour
-	else if ( (hsv_array[0] >= 15) && (hsv_array[0] < 30) ) return 2;//Code of orange colour
-	else if ( (hsv_array[0] >= 30) && (hsv_array[0] < 90) ) return 3;//Code of yellow colour
-	else if ( (hsv_array[0] >= 90) && (hsv_array[0] < 150) ) return 4;//Code of green colour
-	else if ( (hsv_array[0] >= 150) && (hsv_array[0] < 210) ) return 5;//Code of light blue colour
-	else if ( (hsv_array[0] >= 210) && (hsv_array[0] < 270) ) return 6;//Code of blue colour
-	else if ( (hsv_array[0] >= 270) && (hsv_array[0] < 345) ) return 7;//Code of pink colour
+	if ( (hsv_array[0] >= 350) || (hsv_array[0] < 10) ) return 1;//Code of red colour
+	else if ( (hsv_array[0] >= 10) && (hsv_array[0] < 30) ) return 2;//Code of orange colour
+	else if ( (hsv_array[0] >= 30) && (hsv_array[0] < 85) ) return 3;//Code of yellow colour
+	else if ( (hsv_array[0] >= 85) && (hsv_array[0] < 150) ) return 4;//Code of green colour
+	else if ( (hsv_array[0] >= 150) && (hsv_array[0] < 215) ) return 5;//Code of light blue colour
+	else if ( (hsv_array[0] >= 215) && (hsv_array[0] < 270) ) return 6;//Code of blue colour
+	else if ( (hsv_array[0] >= 270) && (hsv_array[0] < 350) ) return 7;//Code of pink colour
 }
 
 uint16_t cutArray(uint8_t *input_array,uint8_t *output_array, uint16_t num_of_elements){
@@ -130,10 +132,14 @@ uint16_t cutArray(uint8_t *input_array,uint8_t *output_array, uint16_t num_of_el
 }
 
 uint8_t getSingleMeasurement(uint16_t* rgb_array_pointer, float* hsv_array_pointer){
-	
+	/*
 	rgb_array_pointer[0] = readColour(RDATAL_ADDR, RDATAH_ADDR);//red
 	rgb_array_pointer[1] = readColour(GDATAL_ADDR, GDATAH_ADDR);//green
 	rgb_array_pointer[2] = readColour(BDATAL_ADDR, BDATAH_ADDR);//blue
+	*/
+
+	readColour(rgb_array_pointer);
+	startConvertion();
 	if ( rgb2hsv(rgb_array_pointer, hsv_array_pointer) ) {
 		uint8_t colour_code = getColourCode(hsv_array_pointer);
 		return(colour_code);//return colour code
