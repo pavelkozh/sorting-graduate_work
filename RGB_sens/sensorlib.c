@@ -52,8 +52,6 @@ void startConvertion(void){
 	i2cWrite(0x01);
 	i2cStop();
 	
-	_delay_ms(3);// delay for initialize after setting PON
-	
 }
 
 uint8_t rgb2hsv(uint16_t* in_rgb_array, float* out_hsv_array){
@@ -132,18 +130,15 @@ uint16_t cutArray(uint8_t *input_array,uint8_t *output_array, uint16_t num_of_el
 }
 
 uint8_t getSingleMeasurement(uint16_t* rgb_array_pointer, float* hsv_array_pointer){
-	/*
-	rgb_array_pointer[0] = readColour(RDATAL_ADDR, RDATAH_ADDR);//red
-	rgb_array_pointer[1] = readColour(GDATAL_ADDR, GDATAH_ADDR);//green
-	rgb_array_pointer[2] = readColour(BDATAL_ADDR, BDATAH_ADDR);//blue
-	*/
 
 	readColour(rgb_array_pointer);
-	startConvertion();
+
 	if ( rgb2hsv(rgb_array_pointer, hsv_array_pointer) ) {
 		uint8_t colour_code = getColourCode(hsv_array_pointer);
+		startConvertion();
 		return(colour_code);//return colour code
 	}
+	startConvertion();
 	return(0); //colour is not defined (black)
 	
 }
@@ -155,15 +150,7 @@ uint8_t getMostCommonElement(uint8_t *array, uint16_t size_of_array){
 	uint8_t sec_array[7]={0}; // copy of filled colour_array
 	
 	for (uint16_t i = 0; i < size_of_array; i++){// filling the colour_array
-		/*
-		if(array[i] == 1) colour_array[0]++;
-		else if(array[i] == 2) colour_array[1]++;
-		else if(array[i] == 3) colour_array[2]++;
-		else if(array[i] == 4) colour_array[3]++;
-		else if(array[i] == 5) colour_array[4]++;
-		else if(array[i] == 6) colour_array[5]++;
-		else if(array[i] == 7) colour_array[6]++;
-		*/
+
 		switch (array[i])
 		{
 		case 1:
