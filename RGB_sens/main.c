@@ -20,12 +20,12 @@ float hsv_array[3] = {0, 0, 0};
 uint8_t defined_colour=0;
 uint8_t shot=0;
 
-ISR (TIMER1_COMPA_vect)
+ISR (TIMER0_COMPA_vect)
 {
 
 	defined_colour=getSingleMeasurement(rgb_array,hsv_array);
 	if (defined_colour) shot=1;
-
+	
 }
 	
 int main(void)
@@ -38,16 +38,16 @@ int main(void)
 	usartInit(UBRR_VALUE);
 	sensorInit(init_sensor_array);
 	
-	TCCR1A|=(0<<1)|(0<<0);      //CTC mode
-	TCCR1B|=(1<<3)|0x01;//CTC mode; no prescale
-	TIMSK1|=(1<<1);//enable interrupt OCRA1	
-	OCR1AH=0x5D;//   8000000 * 3e-3 = 24000 (5DC0 in hex) - 3 ms
-	OCR1AL=0xC0;
+	TCCR0A|=(1<<1);      //CTC mode
+	TCCR0B|=(1<<2); // prescale 256
+	TIMSK0|=(1<<1);//enable interrupt OCRA1	
+	OCR0A=0x4E;//   8000000/256 * 2,5e-3 = 78 (4E in hex) - 2.5 ms
+	
 	sei();
-	TCNT1H=0x5D;
-	TCNT1L=0xBF;// generate interrupt for reading colour
+	TCNT0=0x4D;// generate interrupt for reading colour
 	
 	while (1){
+				
 
 		ind=0;
 		PORTC = 0;
@@ -56,17 +56,22 @@ int main(void)
 			do
 			{
 				if(shot){
-					ind=getSampleArray(defined_colour,sample_array,ind);
-					shot=0;
+					
 
+					ind=getSampleArray(defined_colour,sample_array,ind);
+					//usartTransmitFloat(hsv_array[0]);
+					shot=0;
 				}
+				
 			} while (defined_colour);
 			
 			uint16_t cut_array_size=cutArray(sample_array,cut_sample_array,ind);
 			uint8_t most_element=getMostCommonElement(cut_sample_array,cut_array_size);
 			usartTransmit(1);
 			usartTransmit(most_element);
+			
 		}
+		else //usartTransmitFloat(-1.0);
 		usartTransmit(0);//black
 
 	}
