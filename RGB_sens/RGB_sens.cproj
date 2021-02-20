@@ -177,6 +177,12 @@
     <Compile Include="sensorlib.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="servolib.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="servolib.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="uartlib.c">
       <SubType>compile</SubType>
     </Compile>
