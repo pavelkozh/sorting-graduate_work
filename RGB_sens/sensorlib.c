@@ -3,6 +3,14 @@
 uint8_t flag=1;
 static float max_value,min_value,a;
 
+void timer0Init(void){
+	
+	TCCR0A|=(1<<1);      //CTC mode
+	TCCR0B|=(1<<2); // prescale 256
+	TIMSK0|=(1<<1);//enable interrupt OCRA0
+	OCR0A=0x4E;//   8000000/256 * 2,5e-3 = 78 (4E in hex) - 2.5 ms
+}
+
 void sensorInit(uint8_t *init_array){
 	
 	TWBR |= (1 << TWBR5);// TWBR=32 (for 100 kHz i2c frequency)

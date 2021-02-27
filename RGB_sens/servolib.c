@@ -2,12 +2,19 @@
 
 void servoInit(){
 	
-	DDRB|=2;
-	TCCR1A|=(1<<1)|(1<<7);      //fast PWM mode; clear on compare match
+	DDRB|=(1<<1)|(1<<2);
+	TCCR1A|=(1<<1)|(1<<7)|(1<<5);      //fast PWM mode; clear on compare match
 	TCCR1B|=(1<<4)|(1<<3)|(1<<1)|(1<<0);//fast PWM mode; 64 prescale
-	//TIMSK1|=(1<<1);//enable interrupt OCRA1
-	ICR1H=0x09;
+	ICR1H=0x09;// period of PWM is 20 ms
 	ICR1L=0xC4;
+	
+}
+
+void timer2Init(void){
+	
+	TCCR2A|=(1<<1);      //CTC mode
+	TCCR2B|=(1<<2)|(1<<1)|(1<<0); // prescale 1024
+	OCR2A=0x9C;//   8000000/1024 * 20e-3 = 156 (9C in hex) - 20 ms
 	
 }
 
@@ -40,6 +47,12 @@ uint16_t chooseAngle(uint8_t colour_code){
 	}
 	
 	return angle;
+	
+}
+
+void servoPush(uint16_t direction){
+	
+	OCR1B=direction;// 80 - 90, 210 - 0
 	
 }
 

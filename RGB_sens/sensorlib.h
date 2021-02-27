@@ -5,6 +5,8 @@
 #include "i2clib.h"
 #include <util/delay.h>
 
+/// Function for timer0 initialization
+void timer0Init(void);
 
 /// TCS34725 RGB Sensor's initializing
 /// Parameters: init_array - array of array containing
