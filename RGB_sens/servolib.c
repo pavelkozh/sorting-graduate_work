@@ -1,6 +1,10 @@
 #include "servolib.h"
 
-void servoInit(){
+uint8_t timeout_rotate=0;
+uint8_t timeout_forward_push=0;
+uint8_t timeout_backward_push=0;
+
+void servoInit(void){
 	
 	DDRB|=(1<<1)|(1<<2);
 	TCCR1A|=(1<<1)|(1<<7)|(1<<5);      //fast PWM mode; clear on compare match
@@ -15,6 +19,14 @@ void timer2Init(void){
 	TCCR2A|=(1<<1);      //CTC mode
 	TCCR2B|=(1<<2)|(1<<1)|(1<<0); // prescale 1024
 	OCR2A=0x9C;//   8000000/1024 * 20e-3 = 156 (9C in hex) - 20 ms
+	
+}
+
+void startTimer2(void){
+	
+	TCNT2=0;
+	TIFR2|=(1<<1);//interrupt flag OCF2A is cleared
+	TIMSK2|=(1<<1);//enable interrupt
 	
 }
 
@@ -59,6 +71,39 @@ void servoPush(uint16_t direction){
 void servoRotate(uint16_t angle){
 
 	OCR1A=angle;
+}
+
+uint8_t getServoState(void){
+	
+	if( (timeout_rotate == 0) && (timeout_forward_push == 0) && (timeout_backward_push == 0) ) return 0;
+	else if ( (timeout_rotate == 1) && (timeout_forward_push == 0) && (timeout_backward_push == 0) ) return 1;
+	else if ( (timeout_rotate == 1) && (timeout_forward_push == 1) && (timeout_backward_push == 0) ) return 2;
+
+}
+
+void updateServoState(void){
+	
+	switch (getServoState())
+	{
+		
+		case 0:
+		
+			timeout_rotate=1;
+			break;
+		
+		case 1:
+		
+			timeout_forward_push=1;
+			break;
+		
+		case 2:
+		
+			timeout_rotate=0;
+			timeout_forward_push=0;
+			timeout_backward_push=0;
+			break;
+		
+	}
 }
 
 void shiftArray(uint8_t *array, uint16_t size){

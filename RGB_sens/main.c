@@ -20,10 +20,10 @@ uint16_t rgb_array[3] = {0, 0, 0};
 float hsv_array[3] = {0, 0, 0};
 uint8_t defined_colour=0;
 uint8_t shot=0;
-uint16_t counter=0;
+/*uint16_t counter=0;
 uint8_t timeout_rotate=0;
 uint8_t timeout_forward_push=0;
-uint8_t timeout_backward_push=0;
+uint8_t timeout_backward_push=0;*/
 uint16_t timer2_counter=0;
 uint8_t change_state=0;
 ISR (TIMER0_COMPA_vect)
@@ -45,47 +45,6 @@ ISR (TIMER2_COMPA_vect)
 		updateServoState();
 		change_state=1;
 	}
-	
-}
-
-uint8_t getServoState(void){
-	
-	if( (timeout_rotate == 0) && (timeout_forward_push == 0) && (timeout_backward_push == 0) ) return 0;
-	else if ( (timeout_rotate == 1) && (timeout_forward_push == 0) && (timeout_backward_push == 0) ) return 1;
-	else if ( (timeout_rotate == 1) && (timeout_forward_push == 1) && (timeout_backward_push == 0) ) return 2;
-
-}
-
-void updateServoState(void){
-	
-	switch (getServoState())
-	{
-		
-		case 0:
-		
-			timeout_rotate=1;
-			break;
-		
-		case 1:
-		
-			timeout_forward_push=1;
-			break;
-		
-		case 2:
-		
-			timeout_rotate=0;
-			timeout_forward_push=0;
-			timeout_backward_push=0;
-			break;
-			
-	}
-}
-
-void startTimer2(){
-	
-	TCNT2=0;
-	TIFR2|=(1<<1);//interrupt flag OCF2A is cleared
-	TIMSK2|=(1<<1);//enable interrupt
 	
 }
 	
