@@ -20,12 +20,12 @@ uint16_t rgb_array[3] = {0, 0, 0};
 float hsv_array[3] = {0, 0, 0};
 uint8_t defined_colour=0;
 uint8_t shot=0;
-/*uint16_t counter=0;
+uint16_t timer2_counter=0;
+uint8_t change_state=1;
 uint8_t timeout_rotate=0;
 uint8_t timeout_forward_push=0;
-uint8_t timeout_backward_push=0;*/
-uint16_t timer2_counter=0;
-uint8_t change_state=0;
+uint8_t timeout_backward_push=0;
+
 ISR (TIMER0_COMPA_vect)
 {
 	
@@ -84,34 +84,44 @@ int main(void)
 			uint8_t most_element=getMostCommonElement(cut_sample_array,cut_array_size);
 			usartTransmit(1);
 			usartTransmit(most_element);
-			
-			uint16_t ang=chooseAngle(most_element);
-			servoRotate(ang);
-			startTimer2();
+			line_array[count]=most_element;
+			if(count<49) count++;			
 
-			
-			//line_array[count]=most_element;
-			//if(count<49) count++;
+
 		}
 		else //usartTransmitFloat(-1.0);
 		usartTransmit(0);//black
-		
-		if(change_state){
-			if(getServoState()==1){
+
+
+		if(count>0){
 			
-				servoPush(FORWARD);
-		
-			}
-			else if (getServoState()==2){
+			if(change_state){
 				
-				servoPush(BACKWARD);
-				TIMSK2&=~(1<<1);
+				if(getServoState()==0){
+					uint16_t ang=chooseAngle(line_array[0]);
+					servoRotate(ang);
+					startTimer2();
+					change_state=0;	
+				}
+				
+				if(getServoState()==1){
 			
+					servoPush(FORWARD);
+					change_state=0;	
+				}
+						
+				if (getServoState()==2){
+				
+					servoPush(BACKWARD);
+					//TIMSK2&=~(1<<1);
+					shiftArray(line_array,count);
+					count--;
+					change_state=0;	
+				}	
+	
 			}
-			
-			change_state=0;
-			
 		}
+
 		
 	}
 }

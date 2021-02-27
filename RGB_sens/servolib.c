@@ -1,8 +1,8 @@
 #include "servolib.h"
 
-uint8_t timeout_rotate=0;
-uint8_t timeout_forward_push=0;
-uint8_t timeout_backward_push=0;
+extern uint8_t timeout_rotate;
+extern uint8_t timeout_forward_push;
+extern uint8_t timeout_backward_push;
 
 void servoInit(void){
 	
@@ -101,6 +101,7 @@ void updateServoState(void){
 			timeout_rotate=0;
 			timeout_forward_push=0;
 			timeout_backward_push=0;
+			TIMSK2&=~(1<<1);
 			break;
 		
 	}
