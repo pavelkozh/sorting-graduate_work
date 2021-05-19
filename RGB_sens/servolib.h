@@ -2,8 +2,8 @@
 #define servolib_H_INCLUDED
 #define F_CPU 8000000UL
 #include <avr/io.h>
-#define FORWARD 45
-#define BACKWARD 170
+#define FORWARD 50
+#define BACKWARD 250
 
 /// Function for servo initialization
 void servoInit(void);

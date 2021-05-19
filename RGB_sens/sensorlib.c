@@ -119,8 +119,8 @@ uint8_t getColourCode(float *hsv_array){
 	
 	if ( (hsv_array[0] >= 350) || (hsv_array[0] < 10) ) return 1;//Code of red colour
 	else if ( (hsv_array[0] >= 10) && (hsv_array[0] < 30) ) return 2;//Code of orange colour
-	else if ( (hsv_array[0] >= 30) && (hsv_array[0] < 85) ) return 3;//Code of yellow colour
-	else if ( (hsv_array[0] >= 85) && (hsv_array[0] < 150) ) return 4;//Code of green colour
+	else if ( (hsv_array[0] >= 30) && (hsv_array[0] < 80) ) return 3;//Code of yellow colour
+	else if ( (hsv_array[0] >= 80) && (hsv_array[0] < 150) ) return 4;//Code of green colour
 	else if ( (hsv_array[0] >= 150) && (hsv_array[0] < 215) ) return 5;//Code of light blue colour
 	else if ( (hsv_array[0] >= 215) && (hsv_array[0] < 270) ) return 6;//Code of blue colour
 	else if ( (hsv_array[0] >= 270) && (hsv_array[0] < 350) ) return 7;//Code of pink colour

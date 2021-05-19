@@ -2,7 +2,7 @@
 
 extern uint8_t timeout_rotate;
 extern uint8_t timeout_forward_push;
-extern uint8_t timeout_backward_push;
+//extern uint8_t timeout_backward_push;
 
 void servoInit(void){
 	
@@ -11,7 +11,8 @@ void servoInit(void){
 	TCCR1B|=(1<<4)|(1<<3)|(1<<1)|(1<<0);//fast PWM mode; 64 prescale
 	ICR1H=0x09;// period of PWM is 20 ms
 	ICR1L=0xC4;
-	
+	OCR1A=75;//red
+	OCR1B=250;//backward
 }
 
 void timer2Init(void){
@@ -56,6 +57,11 @@ uint16_t chooseAngle(uint8_t colour_code){
 		angle=320;//180 degrees
 		break;
 		
+		case 255:
+		angle=OCR1A;
+		EIFR|=(1<<1);
+		EIMSK|=(1<<1);
+		break;		
 	}
 	
 	return angle;
@@ -64,7 +70,7 @@ uint16_t chooseAngle(uint8_t colour_code){
 
 void servoPush(uint16_t direction){
 	
-	OCR1B=direction;// 80 - 90, 210 - 0
+	OCR1B=direction;// 50 - 90, 250 - 0
 	
 }
 
@@ -75,9 +81,9 @@ void servoRotate(uint16_t angle){
 
 uint8_t getServoState(void){
 	
-	if( (timeout_rotate == 0) && (timeout_forward_push == 0) && (timeout_backward_push == 0) ) return 0;
-	else if ( (timeout_rotate == 1) && (timeout_forward_push == 0) && (timeout_backward_push == 0) ) return 1;
-	else if ( (timeout_rotate == 1) && (timeout_forward_push == 1) && (timeout_backward_push == 0) ) return 2;
+	if( (timeout_rotate == 0) && (timeout_forward_push == 0) ) return 0;
+	else if ( (timeout_rotate == 1) && (timeout_forward_push == 0) ) return 1;
+	//else if ( (timeout_rotate == 1) && (timeout_forward_push == 1) && (timeout_backward_push == 0) ) return 2;
 
 }
 
@@ -93,9 +99,11 @@ void updateServoState(void){
 		
 		case 1:
 		
-			timeout_forward_push=1;
+			timeout_rotate=0;
+			timeout_forward_push=0;
+			TIMSK2&=~(1<<1);
 			break;
-		
+		/*
 		case 2:
 		
 			timeout_rotate=0;
@@ -103,7 +111,7 @@ void updateServoState(void){
 			timeout_backward_push=0;
 			TIMSK2&=~(1<<1);
 			break;
-		
+		*/
 	}
 }
 

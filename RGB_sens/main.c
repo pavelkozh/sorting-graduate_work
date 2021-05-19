@@ -24,13 +24,22 @@ uint16_t timer2_counter=0;
 uint8_t change_state=1;
 uint8_t timeout_rotate=0;
 uint8_t timeout_forward_push=0;
-uint8_t timeout_backward_push=0;
+//uint8_t timeout_backward_push=0;
+uint16_t count=0;
+uint8_t line_array[20]={0};
+uint8_t ind=0;
+
+ISR(INT1_vect){
+	PORTC^=(1<<0);
+	line_array[count]=255;
+	count++;
+	EIMSK&=~(1<<1);
+}
 
 ISR (TIMER0_COMPA_vect)
 {
 	
 	defined_colour=getSingleMeasurement(rgb_array,hsv_array);
-
 	if (defined_colour) shot=1;
 	
 }
@@ -50,43 +59,48 @@ ISR (TIMER2_COMPA_vect)
 	
 int main(void)
 {
-	uint16_t count=0;
-	uint8_t line_array[15]={0};
+	//uint16_t count=0;
+	//uint8_t line_array[20]={0};
 	uint8_t sample_array[200] = {0};//array for sample measurement
 	uint8_t cut_sample_array[200] = {0};//array for sample measurement
-	uint8_t ind=0;	
+	//uint8_t ind=0;	
 	
+	EICRA|=(1<<3);
+	EIMSK|=(1<<1);
 	DDRC = 0x07;
 	usartInit(UBRR_VALUE);
 	sensorInit(init_sensor_array);
 	servoInit();
 	timer0Init();
 	timer2Init();
+	PORTC|=(1<<0);
 	sei();
 
 	while (1){
 		
 		ind=0;
-		PORTC = 0;
+		//PORTC = 0;
 		if(defined_colour) {
-			PORTC = 1;
+			
+			//PORTC = 1;
 			do
 			{
 				if(shot){
-
+	
 					ind=getSampleArray(defined_colour,sample_array,ind);
 					shot=0;
+					//usartTransmitFloat(hsv_array[0]);
 				}
 				
 			} while (defined_colour);
-			
+			//usartTransmitArray(sample_array,ind,1);
 			uint16_t cut_array_size=cutArray(sample_array,cut_sample_array,ind);
+			//usartTransmitArray(cut_sample_array,cut_array_size,1);
 			uint8_t most_element=getMostCommonElement(cut_sample_array,cut_array_size);
 			usartTransmit(1);
 			usartTransmit(most_element);
 			line_array[count]=most_element;
 			if(count<49) count++;			
-
 
 		}
 		else //usartTransmitFloat(-1.0);
@@ -100,6 +114,7 @@ int main(void)
 				if(getServoState()==0){
 					uint16_t ang=chooseAngle(line_array[0]);
 					servoRotate(ang);
+					servoPush(BACKWARD);
 					startTimer2();
 					change_state=0;	
 				}
@@ -107,19 +122,21 @@ int main(void)
 				if(getServoState()==1){
 			
 					servoPush(FORWARD);
-					change_state=0;	
-				}
-						
-				if (getServoState()==2){
-				
-					servoPush(BACKWARD);
-					//TIMSK2&=~(1<<1);
 					shiftArray(line_array,count);
 					count--;
 					change_state=0;	
+				}
+				/*		
+				if (getServoState()==2){
+				
+					
+					//TIMSK2&=~(1<<1);
+					
+					change_state=0;	
 				}	
-	
+	            */
 			}
+
 		}
 
 		
