@@ -31,6 +31,7 @@ uint8_t clear_variables=0;
 
 void clearLine(void){
 	
+	clear_variables=0;
 	defined_colour=0;
 	count=0;
 	shot=0;
