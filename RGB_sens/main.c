@@ -23,17 +23,40 @@ uint8_t shot=0;
 uint16_t timer2_counter=0;
 uint8_t change_state=1;
 uint8_t timeout_rotate=0;
-uint8_t timeout_forward_push=0;
-//uint8_t timeout_backward_push=0;
+uint8_t timeout_push=0;
 uint16_t count=0;
-uint8_t line_array[20]={0};
+uint8_t line_array[25]={0};
 uint8_t ind=0;
+uint8_t clear_variables=0;
+
+void clearLine(void){
+	
+	defined_colour=0;
+	count=0;
+	shot=0;
+	change_state=1;
+	timeout_push=0;
+	timeout_rotate=0;
+	timer2_counter=0;
+	OCR1A=75;//red
+	OCR1B=250;//backward
+	TIMSK2&=~(1<<1);
+	
+}
+
+ISR(INT0_vect){
+	
+	clear_variables=1;
+	
+}
 
 ISR(INT1_vect){
+	
 	PORTC^=(1<<0);
 	line_array[count]=255;
 	count++;
 	EIMSK&=~(1<<1);
+	
 }
 
 ISR (TIMER0_COMPA_vect)
@@ -65,8 +88,8 @@ int main(void)
 	uint8_t cut_sample_array[200] = {0};//array for sample measurement
 	//uint8_t ind=0;	
 	
-	EICRA|=(1<<3);
-	EIMSK|=(1<<1);
+	EICRA|=(1<<3)|(1<<1);
+	EIMSK|=(1<<1)|(1<<0);
 	DDRC = 0x07;
 	usartInit(UBRR_VALUE);
 	sensorInit(init_sensor_array);
@@ -78,6 +101,7 @@ int main(void)
 
 	while (1){
 		
+		if(clear_variables) clearLine();
 		ind=0;
 		//PORTC = 0;
 		if(defined_colour) {
@@ -126,20 +150,11 @@ int main(void)
 					count--;
 					change_state=0;	
 				}
-				/*		
-				if (getServoState()==2){
-				
-					
-					//TIMSK2&=~(1<<1);
-					
-					change_state=0;	
-				}	
-	            */
+
 			}
 
 		}
 
-		
 	}
 }
 

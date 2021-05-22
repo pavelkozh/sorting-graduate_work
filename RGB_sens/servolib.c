@@ -1,8 +1,7 @@
 #include "servolib.h"
 
 extern uint8_t timeout_rotate;
-extern uint8_t timeout_forward_push;
-//extern uint8_t timeout_backward_push;
+extern uint8_t timeout_push;
 
 void servoInit(void){
 	
@@ -81,9 +80,8 @@ void servoRotate(uint16_t angle){
 
 uint8_t getServoState(void){
 	
-	if( (timeout_rotate == 0) && (timeout_forward_push == 0) ) return 0;
-	else if ( (timeout_rotate == 1) && (timeout_forward_push == 0) ) return 1;
-	//else if ( (timeout_rotate == 1) && (timeout_forward_push == 1) && (timeout_backward_push == 0) ) return 2;
+	if( (timeout_rotate == 0) && (timeout_push == 0) ) return 0;
+	else if ( (timeout_rotate == 1) && (timeout_push == 0) ) return 1;
 
 }
 
@@ -100,18 +98,10 @@ void updateServoState(void){
 		case 1:
 		
 			timeout_rotate=0;
-			timeout_forward_push=0;
+			timeout_push=0;
 			TIMSK2&=~(1<<1);
 			break;
-		/*
-		case 2:
-		
-			timeout_rotate=0;
-			timeout_forward_push=0;
-			timeout_backward_push=0;
-			TIMSK2&=~(1<<1);
-			break;
-		*/
+			
 	}
 }
 
