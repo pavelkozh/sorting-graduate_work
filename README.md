@@ -1,14 +1,20 @@
-# Template of Eclipse project for STM32 Nucleo144-F767ZI board with ChibiOS
+# Проект сортировочного автомата, выполненного на базе микроконтроллера AVR ATmega328P.
+Автомат осуществляет сортировку цветных объектов в реальном времени, распределяя их по отдельным емкостям.
+Пример работы автомата:
 
-### TARGET
+![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
 
-The template runs on an STM32 Nucleo64-F411RE board.
+### Алгоритм работы автомата
 
-### Useful links
-* [Reference manual (RM)](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf)
-* [Datasheet (DS)](https://www.st.com/resource/en/data_brief/nucleo-f411re.pdf)
-* [Nucleo pinout](https://os.mbed.com/platforms/ST-Nucleo-F411RE/)
+1. Считывание цвета объекта, проходящего мимо датчика цвета в канале автомата.
+2. Формирование очереди объектов для сортировки.
+3. Сортировка объектов очереди по принципу FIFO (First Input First Output) с одновременным сдвигом очереди.
 
-### Notes
+Очередь объектов пополняется в режиме реального времени. Сортировка происходит путем подачи последовательности управляющих воздействий на серводвигатели, осуществляющие выталкивание очередного объекта из накопителя и вращение платформы с емкостями.
 
-Based on demos from https://github.com/ChibiOS/ChibiOS
+### Алгоритм формирования очереди объектов
+
+1. Формирование выборки измерений цвета с периодом 2.5 мс и преобразование измерений цветовой модели RGB в цветовую модель HSV.
+2. Обработка выборки измерений (для увеличения вероятности верного определения цвета).
+3. Добавление объекта в массив очереди.
+
