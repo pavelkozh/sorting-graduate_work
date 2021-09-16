@@ -2,7 +2,7 @@
 Автомат осуществляет сортировку цветных объектов в реальном времени, распределяя их по отдельным емкостям.
 Пример работы автомата:
 
-![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+![Alt Text](https://github.com/pavelkozh/sorting-graduate_work/blob/master/source/sorting.gif)
 
 ### Алгоритм работы автомата
 
